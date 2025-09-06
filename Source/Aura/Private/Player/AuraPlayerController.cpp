@@ -17,8 +17,12 @@ void AAuraPlayerController::BeginPlay()
 	check(AuraContext);
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	check(Subsystem);
-	Subsystem->AddMappingContext(AuraContext, 0);
+	//只有local player才会有该Subsystem，如果是其他的联网客户端玩家，则不会有该Subsystem，因此如果使用断言，那么会导致在联机的时候
+	//游戏崩溃，因此使用if判断nullptr后，再AddMappingContext，如果是联网客户端角色，则不进行该操作
+	if (Subsystem)
+	{
+		Subsystem->AddMappingContext(AuraContext, 0);
+	}
 
 	bShowMouseCursor = true;
 	DefaultMouseCursor =EMouseCursor::Default;
