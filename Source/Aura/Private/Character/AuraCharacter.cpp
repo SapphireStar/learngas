@@ -5,7 +5,9 @@
 
 #include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
+#include "UI/HUD/AuraHUD.h"
 
 AAuraCharacter::AAuraCharacter()
 {
@@ -23,12 +25,18 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	InitAbilityActorInfo();
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	Cast<AAuraHUD>(PlayerController->GetHUD())->InitOverlay(PlayerController, GetPlayerState(), GetAbilitySystemComponent(), GetAttributeSet());
 }
 
 void AAuraCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-	InitAbilityActorInfo(); 
+	InitAbilityActorInfo();
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	Cast<AAuraHUD>(PlayerController->GetHUD())->InitOverlay(PlayerController, GetPlayerState(), GetAbilitySystemComponent(), GetAttributeSet());
 }
 
 void AAuraCharacter::InitAbilityActorInfo()
