@@ -21,6 +21,8 @@ public:
 	UAuraAttributeSet();
 	//注册在复制Attributes后，监听的回调方法
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	
 	//使用ReplicatedUsing，标注该变量应该被服务器复制，并且当客户端接收到来自服务器的复制值后，调用OnRep_Health进行处理
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes") 
