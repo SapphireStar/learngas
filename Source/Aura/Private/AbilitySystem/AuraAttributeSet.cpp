@@ -2,7 +2,11 @@
 
 
 #include "AbilitySystem/AuraAttributeSet.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "GameplayEffectExtension.h"
+#include "GameFramework/Character.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -36,6 +40,43 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
 	}
+}
+
+void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+{
+	Super::PostGameplayEffectExecute(Data);
+
+	// Source = effect的causer， Target = effect的target（也就是当前受影响的Attribute Set的owner）
+	
+	const FGameplayEffectContextHandle EffectContextHandle = Data.EffectSpec.GetContext();
+	const UAbilitySystemComponent* SourceASC = EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
+
+	if (IsValid(SourceASC) && SourceASC->AbilityActorInfo.IsValid() && SourceASC->AbilityActorInfo->AvatarActor.IsValid())
+	{
+		AActor* SourceAvatarActor = SourceASC->AbilityActorInfo->AvatarActor.Get();
+		AController* SourceController = SourceASC->AbilityActorInfo->PlayerController.Get();
+		if (SourceController == nullptr && SourceAvatarActor != nullptr)
+		{
+			if (const APawn* Pawn = Cast<APawn>(SourceAvatarActor))
+			{
+				SourceController = Pawn->GetController();
+			}
+		}
+		if (SourceController)
+		{
+			ACharacter* SourceCharacter = Cast<ACharacter>(SourceController->GetPawn());
+		}
+	}
+
+	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid())
+	{
+		AActor* TargetAvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
+		AController* TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
+		ACharacter* TargetCharacter = Cast<ACharacter>(TargetAvatarActor);
+		UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetAvatarActor);
+	}
+	
+	
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
